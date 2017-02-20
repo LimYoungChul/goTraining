@@ -172,16 +172,16 @@ Let's try to work the logic out differently just for clarity.
 
 So with a wall of height 2 we get the following wall combinations
 
-Level:  1               2
-		  [3,6]   + [2,5,7] || [2,4,7]       = [3,6][2,5,7] && [3,6][2,4,7] = 2 combinations  - so by adding 1 height to the wall we got 1 more combination
-		  [3,5,7] + [2,4,6]                  = [3,5,7][2,4,6]               = 1 combination   - we didnt get any more combinations than when our height was 1
-		  [2,5,7] + [3,6]                    = [2,5,7][3,6]                 = 1 combination
-		  [2,4,7] + [3,6]                    = [2,4,7][3,6]                 = 1 combination
-		  [2,4,6] + [3,5,7]                  = [2,4,6][3,5,7]               = 1 combination
+Level:  1          2
+      [3,6]   + [2,5,7] || [2,4,7]       = [3,6][2,5,7] && [3,6][2,4,7] = 2 combinations  - so by adding 1 height to the wall we got 1 more combination
+      [3,5,7] + [2,4,6]                  = [3,5,7][2,4,6]               = 1 combination   - we didnt get any more combinations than when our height was 1
+      [2,5,7] + [3,6]                    = [2,5,7][3,6]                 = 1 combination
+      [2,4,7] + [3,6]                    = [2,4,7][3,6]                 = 1 combination
+      [2,4,6] + [3,5,7]                  = [2,4,6][3,5,7]               = 1 combination
 
 Now we add another level to our wall and we see what happens.
 
-Level:  1     2     				            3
+Level:  1     2                        3
       [3,6][2,5,7] && [3,6][2,4,7] + [3,6]              = [3,6][2,5,7][3,6] && [3,6][2,4,7][3,6]     = 2 combinations - We could only add 1 thing so we didnt get any more combinations
       [3,5,7][2,4,6]               + [3,5,7]            = [3,5,7][2,4,6][3,5,7]                      = 1 combination - Here we are stuck in a loop of adding the same walls on top eachother over and over so we never increase in combinations
       [2,5,7][3,6]                 + [2,5,7] || [2,4,7] = [2,5,7][3,6][2,5,7] && [2,5,7][3,6][2,4,7] = 2 combinations - Since the combination we put on top of our original combination has 2 combinations, the total combinations is now also 2
