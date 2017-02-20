@@ -1,5 +1,5 @@
 
-<h1>This is a solution to Project euler Problem 215. Read the problem description for clarity.<h1>
+This is a solution to Project euler Problem 215. Read the problem description for clarity.
 
 
 Consider building a wall of width 9. How do we find all possible combinations of building it using bricks of 2 and 3 length?
@@ -12,7 +12,7 @@ Tree example:
 
                O                 First brick
         3/           \2          Can be either 3 or 2
-				O              O         Second brick
+        O              O         Second brick
      3/   \2        3/   \2      Can be either 3 or 2 for each option above - 4 options
      O      O       O      O     Third brick
   3/   \2 3/  \2 3/  \2  3/ \2   Can be either 3 or 2 for each option above - 8 options
@@ -150,7 +150,7 @@ We then multiply this vector with the matrix, and this will represent the number
 
 [0,0,1,1,0]   [1]   [0*1 + 0*1 + 1*1 + 1*1 + 0*1]   [2]	- Because there are 2 walls we can put on top, thus expanding our possibilties by 1
 [0,0,0,0,1]   [1]   [0*1 + 0*1 + 0*1 + 0*1 + 1*1]   [1] - Because there is only 1 wall we can put on top
-[1,0,0,0,0] * [1] =	[1*1 + 0*1 + 0*1 + 0*1 + 0*1] = [1]
+[1,0,0,0,0] * [1] = [1*1 + 0*1 + 0*1 + 0*1 + 0*1] = [1]
 [1,0,0,0,0]   [1]   [1*1 + 0*1 + 0*1 + 0*1 + 0*1]   [1]
 [0,1,0,0,0]   [1]   [0*1 + 1*1 + 0*1 + 0*1 + 0*1]   [1]
 
@@ -159,10 +159,10 @@ Vector = [2,1,1,1,1] = 2+1+1+1+1 = 6 - Cause there was only 1 additional combina
 
 If we want to find the possible combinations of a wall with the height 3 we simply take the resulting vector and multiply it with our matrix again
 
-[0,0,1,1,0]   [2]   [0*2 + 0*1 + 1*1 + 1*1 + 0*1]	  [2]
-[0,0,0,0,1]	  [1]   [0*2 + 0*1 + 0*1 + 0*1 + 1*1]	  [1]
-[1,0,0,0,0] * [1] =	[1*2 + 0*1 + 0*1 + 0*1 + 0*1] = [2] - Now we get more combinations cause we have 2 possible solutions in our first matrix row, and this multiplies the number of entries that can go on top of this entry
-[1,0,0,0,0]   [1]   [1*2 + 0*1 + 0*1 + 0*1 + 0*1]	  [2]
+[0,0,1,1,0]   [2]   [0*2 + 0*1 + 1*1 + 1*1 + 0*1]   [2]
+[0,0,0,0,1]   [1]   [0*2 + 0*1 + 0*1 + 0*1 + 1*1]   [1]
+[1,0,0,0,0] * [1] = [1*2 + 0*1 + 0*1 + 0*1 + 0*1] = [2] - Now we get more combinations cause we have 2 possible solutions in our first matrix row, and this multiplies the number of entries that can go on top of this entry
+[1,0,0,0,0]   [1]   [1*2 + 0*1 + 0*1 + 0*1 + 0*1]   [2]
 [0,1,0,0,0]   [1]   [0*2 + 1*1 + 0*1 + 0*1 + 0*1]   [1]
 
 Summing our vector up we see that wall(9,3) = 8
@@ -200,7 +200,7 @@ We could even go on and find wall(9,4)
 
 [0,0,1,1,0]   [2]   [0*2 + 0*1 + 1*2 + 1*2 + 0*1]   [4]
 [0,0,0,0,1]   [1]   [0*2 + 0*1 + 0*2 + 0*2 + 1*1]   [1]
-[1,0,0,0,0] * [2] =	[1*2 + 0*1 + 0*2 + 0*2 + 0*1] = [2]
+[1,0,0,0,0] * [2] = [1*2 + 0*1 + 0*2 + 0*2 + 0*1] = [2]
 [1,0,0,0,0]   [2]   [1*2 + 0*1 + 0*2 + 0*2 + 0*1]   [2]
 [0,1,0,0,0]   [1]   [0*2 + 1*1 + 0*2 + 0*2 + 0*1]   [1]
 
