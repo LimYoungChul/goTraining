@@ -1,0 +1,215 @@
+
+<h1>This is a solution to Project euler Problem 215. Read the problem description for clarity.<h1>
+
+
+Consider building a wall of width 9. How do we find all possible combinations of building it using bricks of 2 and 3 length?
+
+The function findCombinations works like a search tree, exploring every options available for building a wall one by one.
+It uses a Depth First Search that is limited by the width of the wall, but without stopping when a solution is found.
+This solution should be able to use any brick size.
+
+Tree example:
+
+		 				   O							  First brick
+		 		3/ 		       \2					Can be either 3 or 2
+				O			        O					Second brick
+		 3/	 \2        3/   \2 			Can be either 3 or 2 for each option above - 4 options
+		O     O       O      O			Third brick
+ 3/  \2 3/  \2 3/  \2 3/  \2		Can be either 3 or 2 for each option above - 8 options
+			O O    O O    O O    O		If we allready accumulated 9 or more we don't search further down a branch. If it is 9, like 3+3+3 is, then we found a solution.
+etc.....
+
+We explore the tree from left to right, downwards first prioritizing newest children first.
+
+The way we do this in code is by creating a 2d array called open.
+Open holds all the options we have available at a given moment when building the wall.
+The first array in open represents the tree level, the second the options available at this tree level.
+Open starts out with 2 options - 3 and 2.
+Open[0][0] = 3 and Open [0][1] = 2
+We add 3 first so it is leftmost in the array.
+
+When searching the tree we take the leftmost value in the array - which would is 3
+We add this value to a temporary array = [3]
+We remove the value from the open array so open looks like this: [[2]]
+We increment an integer that represents the number of bricks we have put down (or where we are in the tree).
+Lets call the integer: i
+We then add to open, at our current tree level, a new array of [3,2] as we now have this option available for the next step.
+Open now looks like this: [[2][3,2]].
+
+We repeat the process again, but remember we prioritize the newest children over the oldest.
+
+So we take the new 3 out so our temp array looks like this [3,3]
+open looks like this [[2],[2]].
+we add new children [[2],[2],[3,2]].
+repeat again and temp array looks lik this [3,3,3]
+
+Wait! We found a wall of length 9.
+3+3+3 = 9
+
+We add this array to an array of solutions.
+
+When we add it we accumulate the values inside the array and remove the last entry.
+solution array would then look like this [3,6]
+
+Everytime we add something to the temp array, we must check if the sum of the values in the array equals or walls width
+If this is the case we do not add new children to the open array. Theese values will surely extend past or walls wanted length.
+We also don't want to add to our integer since we are not adding a level to our search tree.
+
+Our open array looks like this [[2],[2],[2]]. No new children!
+
+if we allready have a value in temp[i] we simply replace it with what is in open[i][0].
+so our [3,3,3] temp array turns innto [3,3,2]
+
+now we are below the length of the wall again so we add children to the open array.
+
+open = [[2],[2],[],[3,2]]
+
+we try to add 3, but now we are beyond our wall length.
+temp = [3,3,2,3] = 11
+If this is the case we don't add to our integer so we try the next value as the same level.
+temp = [3,3,2,2] = 10 Still too high!
+
+now open looks like this [[2],[2],[],[]].
+
+Our integer i is equal to 3. so how do we traverse the tree back so that i is equal to 1?
+
+Simply the first thing our codes does is check if open[i] has any values. if this is not the case is substracts 1 from i.
+
+doing this twice i = 1.
+
+temp is right now equal to [3,3,2,2].
+
+We want to replace the 2nd value in temp with the 2nd value in open.
+
+temp would by that logic turn into [3,2,2,2].
+This would not be the wanted outcome, so we need to remove any value in temp that above i.
+
+temp = [3,2]
+
+open = [[2],[],[3,2],[]]
+
+temp = [3,2,3]
+
+open = [[2],[],[2],[3,2]]
+
+temp = [3,2,3,3] = 11
+
+temp = [3,2,3,2] = 10
+
+open = [[2],[],[2],[]]
+
+temp = [3,2,2,2] = 9
+
+we add it to an array of solutions.
+
+solution = [3,5,7] - We accumulate the values in temp and remove the last value (which is always 9 btw)
+allSolutions = [[3,6],[3,5,7]]
+
+
+We then continue our pattern until all solutions are found.
+....eventually
+allSolutions = [[3,6],[3,5,7],[2,5,7],[2,4,7],[2,4,6]]
+
+Once we have extended all options and all arrays in open is empty and no more can be added we have searched the entire tree.
+We end the search and return the allSolutions array.
+
+
+This part explains how you get from having an array with all possible combinations for a wall row with width X to combining them into a wall with Y rows.
+How to get all possible combinations is explained further below down at the function 'findCombinations'. *Not added yet
+
+The explanation might be a little over the top, but i personally had a hard time understanding how matrix multiplication can be used to find possible solutions.
+You can also just read the code and understand what's going on if you're a fookin legend ;)
+
+Once we have all possible combinations as an array of values where each value represents the position of a crack (except the start and the end of the wall) we can use it to see which combinations can be put on top of otherwise
+
+Say we are creating a wall of 9 width and 3 height so wall(9,3).
+
+Our combination array would look like this, given a width of 9
+
+combinations = [[3,6][3,5,7][2,5,7][2,4,7][2,4,6]] - Notice no 9's or 0's in our array, these values are irrelevant so we don't add them.
+
+We can then conclude that if any entry in one of our arrays matches a value in another that it won't be able to be put on top of another.
+Why? Because the values represents the positions of cracks, and we don't want any cracks on top of eachother.
+
+We use this to create a matrix of NxN size, where N is the number of combinations. This matrix shows which combinations can go with eachother.
+0 will represent the combinations that are not possbile and 1 will represent the ones that are possible
+
+[3,6]		-> [0,0,1,1,0] - cause [3,6] can combine with [2,5,7] and [2,4,7]
+[3,5,7] -> [0,0,0,0,1] - cause [3,5,7] can combine with [2,4,6]
+[2,5,7] -> [1,0,0,0,0] - cause [2,5,7] can combine with [3,6]
+[2,4,7] -> [1,0,0,0,0] - cause [2,4,7] can combine with [3,6]
+[2,4,6] -> [0,1,0,0,0] - cause [2,4,6] cam combine with [3,5,7]
+
+We then have a sparse matrix that represents which combinations of bricks can go on top of other combinations of bricks.
+
+We then create a vector of 1's that represents the possible number of combinations for a wall of height 1, which in this case is [1,1,1,1,1]
+
+Vector = [1,1,1,1,1]  - Because for a wall of height 1 we can put in our 5 initial combinations.
+
+We then multiply this vector with the matrix, and this will represent the number of combinations of a wall of height 2 in a new vector
+
+				 [0,0,1,1,0]		[1]		[0*1 + 0*1 + 1*1 + 1*1 + 0*1]		[2]	- Because there are 2 walls we can put on top, thus expanding our possibilties by 1
+				 [0,0,0,0,1]	  [1]		[0*1 + 0*1 + 0*1 + 0*1 + 1*1]		[1] - Because there is only 1 wall we can put on top
+Vector = [1,0,0,0,0] *  [1] =	[1*1 + 0*1 + 0*1 + 0*1 + 0*1] = [1]
+				 [1,0,0,0,0]		[1]		[1*1 + 0*1 + 0*1 + 0*1 + 0*1]		[1]
+				 [0,1,0,0,0]		[1]		[0*1 + 1*1 + 0*1 + 0*1 + 0*1]		[1]
+
+If we take the sum of the resulting vector we find the possible solutions for a wall of height 2
+Vector = [2,1,1,1,1] = 2+1+1+1+1 = 6 - Cause there was only 1 additional combination.
+
+If we want to find the possible combinations of a wall with the height 3 we simply take the resulting vector and multiply it with our matrix again
+
+				 [0,0,1,1,0]		[2]		[0*2 + 0*1 + 1*1 + 1*1 + 0*1]		[2]
+				 [0,0,0,0,1]	  [1]		[0*2 + 0*1 + 0*1 + 0*1 + 1*1]		[1]
+Vector = [1,0,0,0,0] *  [1] =	[1*2 + 0*1 + 0*1 + 0*1 + 0*1] = [2] - Now we get more combinations cause we have 2 possible solutions in our first matrix row, and this multiplies the number of entries that can go on top of this entry
+				 [1,0,0,0,0]		[1]		[1*2 + 0*1 + 0*1 + 0*1 + 0*1]		[2]
+				 [0,1,0,0,0]		[1]		[0*2 + 1*1 + 0*1 + 0*1 + 0*1]		[1]
+
+Summing our vector up we see that wall(9,3) = 8
+[2,1,2,2,1] = 2+1+2+2+1 = 8
+
+Let's try to work the logic out differently just for clarity.
+
+So with a wall of height 2 we get the following wall combinations
+
+Level:  1               2
+		  [3,6]   + [2,5,7] || [2,4,7] 			 = [3,6][2,5,7] && [3,6][2,4,7] = 2 combinations	- so by adding 1 height to the wall we got 1 more combination
+		  [3,5,7] + [2,4,6] 								 = [3,5,7][2,4,6] 						  = 1 combination - we didnt get any more combinations than when our height was 1
+		  [2,5,7] + [3,6] 									 = [2,5,7][3,6]     						= 1 combination
+		  [2,4,7] + [3,6] 									 = [2,4,7][3,6]     						= 1 combination
+		  [2,4,6] + [3,5,7] 								 = [2,4,6][3,5,7] 							= 1 combination
+
+Now we add another level to our wall and we see what happens.
+
+Level:  1     2     				            3
+		  [3,6][2,5,7] && [3,6][2,4,7] + [3,6] 							= [3,6][2,5,7][3,6] && [3,6][2,4,7][3,6] 		 = 2 combinations - We could only add 1 thing so we didnt get any more combinations
+		  [3,5,7][2,4,6] 							 + [3,5,7]						= [3,5,7][2,4,6][3,5,7] 								  	 = 1 combination - Here we are stuck in a loop of adding the same walls on top eachother over and over so we never increase in combinations
+		  [2,5,7][3,6] 								 + [2,5,7] || [2,4,7] = [2,5,7][3,6][2,5,7] && [2,5,7][3,6][2,4,7] = 2 combinations - Since the combination we put on top of our original combination has 2 combinations, the total combinations is now also 2
+		  [2,4,7][3,6] 								 + [2,4,7] || [2,5,7]	= [2,4,7][3,6][2,4,7] && [2,4,7][3,6][2,5,7] = 2 combinations - Same as above
+		  [2,4,6][3,5,7] 							 + [2,4,6]						= [2,4,6][3,5,7][2,4,6]											 = 1 combination - Again, we are stuck in a loop here so combination never increases.
+
+
+			We add up the number of combinations: 2+1+2+2+1 = 8
+			And we see that there are 8 combinations for a wall with a width of 9 and a height of 3.
+
+The matrix-vector multiplication represents the same as above, yet much more elegantly so it can be processed relatively quickly.
+The vector keeps track of every point where multiple possiblities are possible and sum them up in one value.
+Since an extra possibility anywhere in the height of the wall affects the number of possibilities when adding a new layer it is simply multiplied with the initial matrix.
+
+We could even go on and find wall(9,4)
+
+					[0,0,1,1,0]		[2]		[0*2 + 0*1 + 1*2 + 1*2 + 0*1]		[4]
+					[0,0,0,0,1]	  [1]		[0*2 + 0*1 + 0*2 + 0*2 + 1*1]		[1]
+Vector = 	[1,0,0,0,0] * [2] =	[1*2 + 0*1 + 0*2 + 0*2 + 0*1] = [2]
+					[1,0,0,0,0]		[2]		[1*2 + 0*1 + 0*2 + 0*2 + 0*1]		[2]
+					[0,1,0,0,0]		[1]		[0*2 + 1*1 + 0*2 + 0*2 + 0*1]		[1]
+
+Summing our vector we see that wall(9,4) = 10
+[4,1,2,2,1] = 4+1+2+2+1 = 10
+
+wall(9,5) = [4,1,4,4,1] = 4+1+4+4+1 = 14
+wall(9,6) = [8,1,4,4,1] = 8+1+4+4+1 = 18
+etc...
+
+This generalized solution can be computed with any width or height. Be vary though it gets exponentially harder for the computer to calculate it
+wall(40,40) takes about ~5 minutes to compute, and going much higher than that will take a long time and eventually return a result too big for an uint64 to hold so you would need to modify the code a bit
