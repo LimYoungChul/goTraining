@@ -10,13 +10,13 @@ This solution should be able to use any brick size.
 
 Tree example:
 
-		 				   O							  First brick
-		 		3/ 		       \2					Can be either 3 or 2
-				O			        O					Second brick
-		 3/	 \2        3/   \2 			Can be either 3 or 2 for each option above - 4 options
-		O     O       O      O			Third brick
- 3/  \2 3/  \2 3/  \2 3/  \2		Can be either 3 or 2 for each option above - 8 options
-			O O    O O    O O    O		If we allready accumulated 9 or more we don't search further down a branch. If it is 9, like 3+3+3 is, then we found a solution.
+               O                 First brick
+        3/           \2          Can be either 3 or 2
+				O              O         Second brick
+     3/   \2        3/   \2      Can be either 3 or 2 for each option above - 4 options
+     O      O       O      O     Third brick
+  3/   \2 3/  \2 3/  \2  3/ \2   Can be either 3 or 2 for each option above - 8 options
+        O O    O O    O O     O  If we allready accumulated 9 or more we don't search further down a branch. If it is 9, like 3+3+3 is, then we found a solution.
 etc.....
 
 We explore the tree from left to right, downwards first prioritizing newest children first.
@@ -134,7 +134,7 @@ Why? Because the values represents the positions of cracks, and we don't want an
 We use this to create a matrix of NxN size, where N is the number of combinations. This matrix shows which combinations can go with eachother.
 0 will represent the combinations that are not possbile and 1 will represent the ones that are possible
 
-[3,6]		-> [0,0,1,1,0] - cause [3,6] can combine with [2,5,7] and [2,4,7]
+[3,6]   -> [0,0,1,1,0] - cause [3,6] can combine with [2,5,7] and [2,4,7]
 [3,5,7] -> [0,0,0,0,1] - cause [3,5,7] can combine with [2,4,6]
 [2,5,7] -> [1,0,0,0,0] - cause [2,5,7] can combine with [3,6]
 [2,4,7] -> [1,0,0,0,0] - cause [2,4,7] can combine with [3,6]
@@ -148,22 +148,22 @@ Vector = [1,1,1,1,1]  - Because for a wall of height 1 we can put in our 5 initi
 
 We then multiply this vector with the matrix, and this will represent the number of combinations of a wall of height 2 in a new vector
 
-				 [0,0,1,1,0]		[1]		[0*1 + 0*1 + 1*1 + 1*1 + 0*1]		[2]	- Because there are 2 walls we can put on top, thus expanding our possibilties by 1
-				 [0,0,0,0,1]	  [1]		[0*1 + 0*1 + 0*1 + 0*1 + 1*1]		[1] - Because there is only 1 wall we can put on top
-Vector = [1,0,0,0,0] *  [1] =	[1*1 + 0*1 + 0*1 + 0*1 + 0*1] = [1]
-				 [1,0,0,0,0]		[1]		[1*1 + 0*1 + 0*1 + 0*1 + 0*1]		[1]
-				 [0,1,0,0,0]		[1]		[0*1 + 1*1 + 0*1 + 0*1 + 0*1]		[1]
+[0,0,1,1,0]   [1]   [0*1 + 0*1 + 1*1 + 1*1 + 0*1]   [2]	- Because there are 2 walls we can put on top, thus expanding our possibilties by 1
+[0,0,0,0,1]   [1]   [0*1 + 0*1 + 0*1 + 0*1 + 1*1]   [1] - Because there is only 1 wall we can put on top
+[1,0,0,0,0] * [1] =	[1*1 + 0*1 + 0*1 + 0*1 + 0*1] = [1]
+[1,0,0,0,0]   [1]   [1*1 + 0*1 + 0*1 + 0*1 + 0*1]   [1]
+[0,1,0,0,0]   [1]   [0*1 + 1*1 + 0*1 + 0*1 + 0*1]   [1]
 
 If we take the sum of the resulting vector we find the possible solutions for a wall of height 2
 Vector = [2,1,1,1,1] = 2+1+1+1+1 = 6 - Cause there was only 1 additional combination.
 
 If we want to find the possible combinations of a wall with the height 3 we simply take the resulting vector and multiply it with our matrix again
 
-				 [0,0,1,1,0]		[2]		[0*2 + 0*1 + 1*1 + 1*1 + 0*1]		[2]
-				 [0,0,0,0,1]	  [1]		[0*2 + 0*1 + 0*1 + 0*1 + 1*1]		[1]
-Vector = [1,0,0,0,0] *  [1] =	[1*2 + 0*1 + 0*1 + 0*1 + 0*1] = [2] - Now we get more combinations cause we have 2 possible solutions in our first matrix row, and this multiplies the number of entries that can go on top of this entry
-				 [1,0,0,0,0]		[1]		[1*2 + 0*1 + 0*1 + 0*1 + 0*1]		[2]
-				 [0,1,0,0,0]		[1]		[0*2 + 1*1 + 0*1 + 0*1 + 0*1]		[1]
+[0,0,1,1,0]   [2]   [0*2 + 0*1 + 1*1 + 1*1 + 0*1]	  [2]
+[0,0,0,0,1]	  [1]   [0*2 + 0*1 + 0*1 + 0*1 + 1*1]	  [1]
+[1,0,0,0,0] * [1] =	[1*2 + 0*1 + 0*1 + 0*1 + 0*1] = [2] - Now we get more combinations cause we have 2 possible solutions in our first matrix row, and this multiplies the number of entries that can go on top of this entry
+[1,0,0,0,0]   [1]   [1*2 + 0*1 + 0*1 + 0*1 + 0*1]	  [2]
+[0,1,0,0,0]   [1]   [0*2 + 1*1 + 0*1 + 0*1 + 0*1]   [1]
 
 Summing our vector up we see that wall(9,3) = 8
 [2,1,2,2,1] = 2+1+2+2+1 = 8
@@ -173,24 +173,24 @@ Let's try to work the logic out differently just for clarity.
 So with a wall of height 2 we get the following wall combinations
 
 Level:  1               2
-		  [3,6]   + [2,5,7] || [2,4,7] 			 = [3,6][2,5,7] && [3,6][2,4,7] = 2 combinations	- so by adding 1 height to the wall we got 1 more combination
-		  [3,5,7] + [2,4,6] 								 = [3,5,7][2,4,6] 						  = 1 combination - we didnt get any more combinations than when our height was 1
-		  [2,5,7] + [3,6] 									 = [2,5,7][3,6]     						= 1 combination
-		  [2,4,7] + [3,6] 									 = [2,4,7][3,6]     						= 1 combination
-		  [2,4,6] + [3,5,7] 								 = [2,4,6][3,5,7] 							= 1 combination
+		  [3,6]   + [2,5,7] || [2,4,7]       = [3,6][2,5,7] && [3,6][2,4,7] = 2 combinations  - so by adding 1 height to the wall we got 1 more combination
+		  [3,5,7] + [2,4,6]                  = [3,5,7][2,4,6]               = 1 combination   - we didnt get any more combinations than when our height was 1
+		  [2,5,7] + [3,6]                    = [2,5,7][3,6]                 = 1 combination
+		  [2,4,7] + [3,6]                    = [2,4,7][3,6]                 = 1 combination
+		  [2,4,6] + [3,5,7]                  = [2,4,6][3,5,7]               = 1 combination
 
 Now we add another level to our wall and we see what happens.
 
 Level:  1     2     				            3
-		  [3,6][2,5,7] && [3,6][2,4,7] + [3,6] 							= [3,6][2,5,7][3,6] && [3,6][2,4,7][3,6] 		 = 2 combinations - We could only add 1 thing so we didnt get any more combinations
-		  [3,5,7][2,4,6] 							 + [3,5,7]						= [3,5,7][2,4,6][3,5,7] 								  	 = 1 combination - Here we are stuck in a loop of adding the same walls on top eachother over and over so we never increase in combinations
-		  [2,5,7][3,6] 								 + [2,5,7] || [2,4,7] = [2,5,7][3,6][2,5,7] && [2,5,7][3,6][2,4,7] = 2 combinations - Since the combination we put on top of our original combination has 2 combinations, the total combinations is now also 2
-		  [2,4,7][3,6] 								 + [2,4,7] || [2,5,7]	= [2,4,7][3,6][2,4,7] && [2,4,7][3,6][2,5,7] = 2 combinations - Same as above
-		  [2,4,6][3,5,7] 							 + [2,4,6]						= [2,4,6][3,5,7][2,4,6]											 = 1 combination - Again, we are stuck in a loop here so combination never increases.
+      [3,6][2,5,7] && [3,6][2,4,7] + [3,6]              = [3,6][2,5,7][3,6] && [3,6][2,4,7][3,6]     = 2 combinations - We could only add 1 thing so we didnt get any more combinations
+      [3,5,7][2,4,6]               + [3,5,7]            = [3,5,7][2,4,6][3,5,7]                      = 1 combination - Here we are stuck in a loop of adding the same walls on top eachother over and over so we never increase in combinations
+      [2,5,7][3,6]                 + [2,5,7] || [2,4,7] = [2,5,7][3,6][2,5,7] && [2,5,7][3,6][2,4,7] = 2 combinations - Since the combination we put on top of our original combination has 2 combinations, the total combinations is now also 2
+      [2,4,7][3,6]                 + [2,4,7] || [2,5,7]	= [2,4,7][3,6][2,4,7] && [2,4,7][3,6][2,5,7] = 2 combinations - Same as above
+      [2,4,6][3,5,7]               + [2,4,6]            = [2,4,6][3,5,7][2,4,6]                      = 1 combination - Again, we are stuck in a loop here so combination never increases.
 
 
-			We add up the number of combinations: 2+1+2+2+1 = 8
-			And we see that there are 8 combinations for a wall with a width of 9 and a height of 3.
+We add up the number of combinations: 2+1+2+2+1 = 8
+And we see that there are 8 combinations for a wall with a width of 9 and a height of 3.
 
 The matrix-vector multiplication represents the same as above, yet much more elegantly so it can be processed relatively quickly.
 The vector keeps track of every point where multiple possiblities are possible and sum them up in one value.
@@ -198,11 +198,11 @@ Since an extra possibility anywhere in the height of the wall affects the number
 
 We could even go on and find wall(9,4)
 
-					[0,0,1,1,0]		[2]		[0*2 + 0*1 + 1*2 + 1*2 + 0*1]		[4]
-					[0,0,0,0,1]	  [1]		[0*2 + 0*1 + 0*2 + 0*2 + 1*1]		[1]
-Vector = 	[1,0,0,0,0] * [2] =	[1*2 + 0*1 + 0*2 + 0*2 + 0*1] = [2]
-					[1,0,0,0,0]		[2]		[1*2 + 0*1 + 0*2 + 0*2 + 0*1]		[2]
-					[0,1,0,0,0]		[1]		[0*2 + 1*1 + 0*2 + 0*2 + 0*1]		[1]
+[0,0,1,1,0]   [2]   [0*2 + 0*1 + 1*2 + 1*2 + 0*1]   [4]
+[0,0,0,0,1]   [1]   [0*2 + 0*1 + 0*2 + 0*2 + 1*1]   [1]
+[1,0,0,0,0] * [2] =	[1*2 + 0*1 + 0*2 + 0*2 + 0*1] = [2]
+[1,0,0,0,0]   [2]   [1*2 + 0*1 + 0*2 + 0*2 + 0*1]   [2]
+[0,1,0,0,0]   [1]   [0*2 + 1*1 + 0*2 + 0*2 + 0*1]   [1]
 
 Summing our vector we see that wall(9,4) = 10
 [4,1,2,2,1] = 4+1+2+2+1 = 10
