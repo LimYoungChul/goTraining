@@ -178,8 +178,122 @@ func wall(width, height int) uint64 {
 	}
 	return total
 }
+
+/*
+Consider building a wall of width 9. How do we find all possible combinations of building it using bricks of 2 and 3 length.
+
+findCombinations works like a search tree, exploring every options available for building a wall one by one.
+It uses a Depth First Search that is limited by the width of the wall, but without stopping when a solution is found.
+This solution should be able to use any brick size.
+
+Tree example:
+
+		 				   O							  First brick
+		 		3/ 		       \2					Can be either 3 or 2
+				O			        O					Second brick
+		 3/	 \2        3/   \2 			Can be either 3 or 2 for each option above - 4 options
+		O     O       O      O			Third brick
+ 3/  \2 3/  \2 3/  \2 3/  \2		Can be either 3 or 2 for each option above - 8 options
+			O O    O O    O O    O		If we allready accumulated 9 or more we don't search further down a branch. If it is 9, like 3+3+3 is, then we found a solution.
+etc.....
+
+We explore the tree from left to right, downwards first prioritizing newest children first.
+
+The way we do this in code is by creating a 2d array called open.
+Open holds all the options we have available at a given moment when building the wall.
+The first array in open represents the tree level, the second the options available at this tree level.
+Open starts out with 2 options - 3 and 2.
+Open[0][0] = 3 and Open [0][1] = 2
+We add 3 first so it is leftmost in the array.
+
+When searching the tree we take the leftmost value in the array - which would is 3
+We add this value to a temporary array = [3]
+We remove the value from the open array so open looks like this: [[2]]
+We increment an integer that represents the number of bricks we have put down (or where we are in the tree).
+Lets call the integer: i
+We then add to open, at our current tree level, a new array of [3,2] as we now have this option available for the next step.
+Open now looks like this: [[2][3,2]].
+
+We repeat the process again, but remember we prioritize the newest children over the oldest.
+
+So we take the new 3 out so our temp array looks like this [3,3]
+open looks like this [[2],[2]].
+we add new children [[2],[2],[3,2]].
+repeat again and temp array looks lik this [3,3,3]
+
+Wait! We found a wall of length 9.
+3+3+3 = 9
+
+We add this array to an array of solutions.
+
+When we add it we accumulate the values inside the array and remove the last entry.
+solution array would then look like this [3,6]
+
+Everytime we add something to the temp array, we must check if the sum of the values in the array equals or walls width
+If this is the case we do not add new children to the open array. Theese values will surely extend past or walls wanted length.
+We also don't want to add to our integer since we are not adding a level to our search tree.
+
+Our open array looks like this [[2],[2],[2]]. No new children!
+
+if we allready have a value in temp[i] we simply replace it with what is in open[i][0].
+so our [3,3,3] temp array turns innto [3,3,2]
+
+now we are below the length of the wall again so we add children to the open array.
+
+open = [[2],[2],[],[3,2]]
+
+we try to add 3, but now we are beyond our wall length.
+temp = [3,3,2,3] = 11
+If this is the case we don't add to our integer so we try the next value as the same level.
+temp = [3,3,2,2] = 10 Still too high!
+
+now open looks like this [[2],[2],[],[]].
+
+Our integer i is equal to 3. so how do we traverse the tree back so that i is equal to 1?
+
+Simply the first thing our codes does is check if open[i] has any values. if this is not the case is substracts 1 from i.
+
+doing this twice i = 1.
+
+temp is right now equal to [3,3,2,2].
+
+We want to replace the 2nd value in temp with the 2nd value in open.
+
+temp would by that logic turn into [3,2,2,2].
+This would not be the wanted outcome, so we need to remove any value in temp that above i.
+
+temp = [3,2]
+
+open = [[2],[],[3,2],[]]
+
+temp = [3,2,3]
+
+open = [[2],[],[2],[3,2]]
+
+temp = [3,2,3,3] = 11
+
+temp = [3,2,3,2] = 10
+
+open = [[2],[],[2],[]]
+
+temp = [3,2,2,2] = 9
+
+we add it to an array of solutions.
+
+solution = [3,5,7] - We accumulate the values in temp and remove the last value (which is always 9 btw)
+allSolutions = [[3,6],[3,5,7]]
+
+
+We then continue our pattern until all solutions are found.
+....eventually
+allSolutions = [[3,6],[3,5,7],[2,5,7],[2,4,7],[2,4,6]]
+
+Once we have extended all options and all arrays in open is empty and no more can be added we have searched the entire tree.
+We end the search and return the allSolutions array.
+
+*/
 func findCombinations(width int) [][]int {
-	var i int
+	var i int //represents the number of bricks currently placed
 	var tmp int
 	open := make([][]int, 0, 100)
 	var solutionsHolder [][]int
@@ -204,10 +318,9 @@ func findCombinations(width int) [][]int {
 					counter2 += tmpArray[n]
 					solutionArray[n] = counter2
 				}
-
 				solutionsHolder = append(solutionsHolder, solutionArray)
 
-				for _, v := range open {
+				for _, v := range open { //this checks if there are no more values in open, if so we end our search
 					tmp += len(v)
 				}
 				if tmp == 0 {
@@ -215,7 +328,7 @@ func findCombinations(width int) [][]int {
 				}
 				tmp = 0
 			} else if counter > width {
-				for _, v := range open {
+				for _, v := range open { //we also check if open is empty here. I should probably put this in a function ;)
 					tmp += len(v)
 				}
 				if tmp == 0 {
@@ -224,14 +337,14 @@ func findCombinations(width int) [][]int {
 				tmp = 0
 			} else if counter < width {
 				i++
-				if len(open) <= i {
+				if len(open) <= i { //we don't want panic errors
 					open = append(open, []int{3, 2})
 				} else {
-					open[i] = append(open[i], []int{3, 2}...)
+					open[i] = append(open[i], []int{3, 2}...) //we can't just append to the end if we are not at the end of a branch
 				}
 			}
 		} else {
-			i--
+			i-- //traverse backwards
 		}
 	}
 }
