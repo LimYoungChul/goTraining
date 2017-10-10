@@ -16,7 +16,7 @@ Tree example:
      3/   \2        3/   \2      Can be either 3 or 2 for each option above - 4 options
      O      O       O      O     Third brick
   3/   \2 3/  \2 3/  \2  3/ \2   Can be either 3 or 2 for each option above - 8 options
-        O O    O O    O O     O  If we allready accumulated 9 or more we don't search further down a branch. If it is 9, like 3+3+3 is, then we found a solution.
+        O O    O O    O O     O  If we already accumulated 9 or more we don't search further down a branch. If it is 9, like 3+3+3 is, then we found a solution.
 etc.....
 
 We explore the tree from left to right, downwards first prioritizing newest children first.
@@ -28,7 +28,7 @@ Open starts out with 2 options - 3 and 2.
 Open[0][0] = 3 and Open [0][1] = 2
 We add 3 first so it is leftmost in the array.
 
-When searching the tree we take the leftmost value in the array - which would is 3
+When searching the tree we take the leftmost value in the array - which would be 3 here
 We add this value to a temporary array = [3]
 We remove the value from the open array so open looks like this: [[2]]
 We increment an integer that represents the number of bricks we have put down (or where we are in the tree).
@@ -52,7 +52,7 @@ When we add it we accumulate the values inside the array and remove the last ent
 solution array would then look like this [3,6]
 
 Everytime we add something to the temp array, we must check if the sum of the values in the array equals or walls width
-If this is the case we do not add new children to the open array. Theese values will surely extend past or walls wanted length.
+If this is the case we do not add new children to the open array. Theese values will surely extend past the walls wanted length.
 We also don't want to add to our integer since we are not adding a level to our search tree.
 
 Our open array looks like this [[2],[2],[2]]. No new children!
@@ -115,7 +115,7 @@ We end the search and return the allSolutions array.
 
 
 This part explains how you get from having an array with all possible combinations for a wall row with width X to combining them into a wall with Y rows.
-How to get all possible combinations is explained further below down at the function 'findCombinations'. *Not added yet
+How to get all possible combinations is explained further below down at the function 'findCombinations'.
 
 The explanation might be a little over the top, but i personally had a hard time understanding how matrix multiplication can be used to find possible solutions.
 You can also just read the code and understand what's going on if you're a fookin legend ;)
