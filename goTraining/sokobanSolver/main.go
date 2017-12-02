@@ -6,7 +6,7 @@ import (
 )
 
 // 1 10 09 04
-// stringArray[0] = 2 "     XXXXX"
+// 2 "     XXXXX"
 // 3 "XXXXXX...X"
 // 4 "X..J.....X"
 // 5 "X..JXXX.XX"
@@ -28,6 +28,58 @@ var J = byte('J')
 //DOT dwadwa
 var DOT = byte('.')
 
+// var boxes []Box
+
+//Coordinate storage
+type Coordinate struct {
+	X, Y      int
+	heuristic int
+	Parent    *Coordinate
+}
+
+func newCoordinate(x, y int, parent *Coordinate) Coordinate {
+	coordinate := Coordinate{}
+	coordinate.X = x
+	coordinate.Y = y
+	coordinate.Parent = parent
+	coordinate.heuristic = distance(x, y, destination)
+
+	return coordinate
+}
+
+//Box represents a box in the matrix
+type Box struct {
+	coordinate     Coordinate
+	possiblePushes []Coordinate
+	inGoal         bool
+	stuck          bool
+	path           []Coordinate
+}
+
+func (b Box) push(ss []string, matrix [][]byte) {
+	for _, s := range ss {
+		switch s {
+		case "left":
+			b.coordinate.Y--
+		case "right":
+			b.coordinate.Y++
+		case "up":
+			b.coordinate.X--
+		case "down":
+			b.coordinate.X++
+		}
+	}
+}
+
+func createBox(x, y int) Box {
+	box := Box{}
+	box.coordinate = newCoordinate(x, y, nil)
+
+	return box
+}
+
+//var finalPath []Coordinate
+
 func main() {
 	start := time.Now()
 	var stringArray [9]string
@@ -41,104 +93,130 @@ func main() {
 	stringArray[7] = " X..X     "
 	stringArray[8] = " XXXX     "
 
-	matrix := make([][]byte, 0)
-	matrixCopy := matrix
-	matrixPointer := &matrix
+	var stingArray [9]string
+	stingArray[0] = "XXXXXXXXXX"
+	stingArray[1] = "XXXXXXXXXX"
+	stingArray[2] = "XXG.J..GXX"
+	stingArray[3] = "XX......XX"
+	stingArray[4] = "XX..JJ..XX"
+	stingArray[5] = "XX......XX"
+	stingArray[6] = "XXG.J..GXX"
+	stingArray[7] = "XXXXXXXXXX"
+	stingArray[8] = "XXXXXXXXXX"
 
-	for i := range stringArray {
-		tmp := []byte(stringArray[i])
-		matrix = append(matrix[:], tmp)
+	originalMatrix := make([][]byte, 0)
+	// matrixCopy := matrix
+	// matrixPointer := &matrix
+
+	for i := range stingArray {
+		tmp := []byte(stingArray[i])
+		originalMatrix = append(originalMatrix[:], tmp)
 	}
-	//i just make x = y and y = x, so we can write x,y instead of y,x.
-	transpose(matrix)
-	fmt.Println(matrix[3][6])
-	fmt.Println(matrix[4][6])
-	fmt.Println(matrix[2][6])
-	fmt.Println(matrix[3][7])
-	fmt.Println(matrix[3][5])
-	fmt.Println(possibleTurns(3, 6, matrix))
+	//fmt.Println(step(6, 3, 0, 15, originalMatrix))
+
+	//fmt.Sprintf("matrix value %s", string(matrix[6][3])))
+	// fmt.Println(fmt.Sprintf("matrix up %s", string(matrix[5][3])))
+	// fmt.Println(fmt.Sprintf("matrix down %s", string(matrix[7][3])))
+	// fmt.Println(fmt.Sprintf("matrix left %s", string(matrix[6][2])))
+	// fmt.Println(fmt.Sprintf("matrix right %s", string(matrix[6][4])))
+
 	elapsed := time.Since(start)
 	fmt.Println("Runtime: ", elapsed)
 }
 
-func transpose(a [][]byte) {
-	n := len(a)
-	b := make([][]byte, n)
-	for i := 0; i < n; i++ {
-		b[i] = make([]byte, n)
-		for j := 0; j < n; j++ {
-			b[i][j] = a[j][i]
+func solveSokoban(x, y int, matrix [][]byte) {
+	maxCounter := 5
+	counter := 0
+	startBoxes := createBoxes(matrix)
+	var stateArray [][]Coordinate
+	solved := false
+
+	for _, v := range startBoxes {
+
+		stateArray[0] = append(stateArray[0], v.possiblePushes...)
+
+	}
+
+	for !solved {
+
+		for counter < maxCounter {
+
 		}
 	}
-	copy(a, b)
+
 }
 
-func step(x, y int, matrix [][]byte, state []string) {
-	moves := possibleTurns(x, y, matrix)
-	if isCompleted(matrix) == true {
-		return
+func createBoxes(matrix [][]byte) []Box {
+	var boxes []Box
+	for i, v := range matrix {
+		for i2, v2 := range v {
+			if v2 == J {
+				boxes = append(boxes, createBox(i, i2))
+			}
+		}
 	}
-
+	return boxes
 }
+func updateBoxPushes(x, y int, boxes []Box, matrix [][]byte) {
 
-func isCompleted(stepCounter, maxSteps int, matrix [][]byte) bool {
-	if matrix[2][4] == J && matrix[4][4] == J && matrix[6][4] == J && matrix[8][4] == J {
-		return true
-	}
-	if stepCounter == maxSteps {
-		return true
-	}
+	origin := newCoordinate(x, y, nil)
 
-	return false
-}
+	for i := range boxes {
+		left := matrix[boxes[i].coordinate.X][boxes[i].coordinate.Y-1]
+		right := matrix[boxes[i].coordinate.X][boxes[i].coordinate.Y+1]
+		up := matrix[boxes[i].coordinate.X-1][boxes[i].coordinate.Y]
+		down := matrix[boxes[i].coordinate.X+1][boxes[i].coordinate.Y]
 
-func possibleTurns(x, y int, matrix [][]byte) []string {
-	var posTurns = make([]string, 0, 4)
-	leftMove := matrix[x-1][y]
-	rightMove := matrix[x+1][y]
-	upMove := matrix[x][y-1]
-	downMove := matrix[x][y+1]
-	doubleLeftMove := matrix[x-2][y]
-	doubleRightMove := matrix[x+2][y]
-	doubleUpMove := matrix[x][y-2]
-	doubleDownMove := matrix[x][y+2]
-
-	if leftMove != X {
-		if leftMove == DOT || leftMove == G {
-			posTurns = append(posTurns, "L")
-		} else if leftMove == J {
-			if doubleLeftMove != J && doubleLeftMove != X {
-				posTurns = append(posTurns, "LJ")
+		if (up == X || down == X) && (left == X || right == X) {
+			boxes[i].stuck = true
+		}
+		// if (boxes[i].coordinate.X == 4) && (boxes[i].coordinate.Y == 2 || boxes[i].coordinate.Y == 4 || boxes[i].coordinate.Y == 6 || boxes[i].coordinate.Y == 8) {
+		// 	boxes[i].inGoal = true
+		// } else {
+		// 	boxes[i].inGoal = false
+		// }
+		if (boxes[i].coordinate.X == 2 && boxes[i].coordinate.Y == 2) || (boxes[i].coordinate.X == 2 && boxes[i].coordinate.Y == 7) || (boxes[i].coordinate.X == 6 && boxes[i].coordinate.Y == 2) || (boxes[i].coordinate.X == 6 && boxes[i].coordinate.Y == 7) {
+			boxes[i].inGoal = true
+		} else {
+			boxes[i].inGoal = false
+		}
+		if boxes[i].stuck == false {
+			if left == DOT || left == G { // If i can stand to the left of the box.
+				if right == DOT || right == G { // And i can push it to the right of the box.
+					test, path := aSTAR(origin, newCoordinate(boxes[i].coordinate.X, boxes[i].coordinate.Y-1, nil), matrix) // and i can move to the left of the box from where i stand.
+					if test {
+						boxes[i].possiblePushes = append(boxes[i].possiblePushes, newCoordinate(boxes[i].coordinate.X, boxes[i].coordinate.Y-1, nil)) //then add that option to the box
+						boxes[i].path = path
+					}
+				}
+			}
+			if right == DOT || right == G {
+				if left == DOT || left == G {
+					test, path := aSTAR(origin, newCoordinate(boxes[i].coordinate.X, boxes[i].coordinate.Y+1, nil), matrix)
+					if test {
+						boxes[i].possiblePushes = append(boxes[i].possiblePushes, newCoordinate(boxes[i].coordinate.X, boxes[i].coordinate.Y+1, nil))
+						boxes[i].path = path
+					}
+				}
+			}
+			if up == DOT || up == G {
+				if down == DOT || down == G {
+					test, path := aSTAR(origin, newCoordinate(boxes[i].coordinate.X-1, boxes[i].coordinate.Y, nil), matrix)
+					if test {
+						boxes[i].possiblePushes = append(boxes[i].possiblePushes, newCoordinate(boxes[i].coordinate.X-1, boxes[i].coordinate.Y, nil))
+						boxes[i].path = path
+					}
+				}
+			}
+			if down == DOT || down == G {
+				if up == DOT || up == G {
+					test, path := aSTAR(origin, newCoordinate(boxes[i].coordinate.X+1, boxes[i].coordinate.Y, nil), matrix)
+					if test {
+						boxes[i].possiblePushes = append(boxes[i].possiblePushes, newCoordinate(boxes[i].coordinate.X+1, boxes[i].coordinate.Y, nil))
+						boxes[i].path = path
+					}
+				}
 			}
 		}
 	}
-	if rightMove != X {
-		if rightMove == DOT || rightMove == G {
-			posTurns = append(posTurns, "R")
-		} else if rightMove == J {
-			if doubleRightMove != J && doubleRightMove != X {
-				posTurns = append(posTurns, "RJ")
-			}
-		}
-	}
-	if upMove != X {
-		if upMove == DOT || upMove == G {
-			posTurns = append(posTurns, "U")
-		} else if upMove == J {
-			if doubleUpMove != J && doubleUpMove != X {
-				posTurns = append(posTurns, "UJ")
-			}
-		}
-	}
-	if downMove != X {
-		if downMove == DOT || downMove == G {
-			posTurns = append(posTurns, "D")
-		} else if downMove == J {
-			if doubleDownMove != J && doubleDownMove != X {
-				posTurns = append(posTurns, "DJ")
-			}
-		}
-	}
-
-	return posTurns
 }
