@@ -50,9 +50,10 @@ func generatePath(c Coordinate) []Coordinate {
 	var finalPath []Coordinate
 	node := c
 	for node.Parent != nil {
-		finalPath = append(finalPath, node)
+		finalPath = append([]Coordinate{node}, finalPath...)
 		node = *node.Parent
 	}
+	finalPath = append([]Coordinate{node}, finalPath...)
 	return finalPath
 }
 
@@ -130,13 +131,13 @@ func getValidNodes(c Coordinate, matrix [][]byte) []Coordinate {
 	if column > 0 {
 		left = matrix[row][column-1]
 	}
-	if column < 9 {
+	if column < len(matrix[row]) {
 		right = matrix[row][column+1]
 	}
 	if row > 0 {
 		up = matrix[row-1][column]
 	}
-	if row < 8 {
+	if row < len(matrix) {
 		down = matrix[row+1][column]
 	}
 

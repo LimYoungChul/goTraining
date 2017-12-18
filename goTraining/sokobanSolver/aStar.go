@@ -16,6 +16,7 @@ func aSTAR(origin Coordinate, dest Coordinate, matrix [][]byte) (bool, []Coordin
 	}
 	destination = dest
 	closedList = nil //reset this fucker
+	openList = nil   //reset this fucker too
 	openList = append(openList, origin)
 	succes, finalPath := findPath(matrix)
 	return succes, finalPath
@@ -49,18 +50,18 @@ func generatePath(c Coordinate) []Coordinate {
 	var finalPath []Coordinate
 	node := c
 	for node.Parent != nil {
-		finalPath = append(finalPath, node)
+		finalPath = append([]Coordinate{node}, finalPath...)
 		node = *node.Parent
 	}
+	finalPath = append([]Coordinate{node}, finalPath...)
 	return finalPath
 }
 
 func addToClosedList(c Coordinate) bool {
-
+	closedList = append(closedList, c)
 	if c.X == destination.X && c.Y == destination.Y {
 		return true
 	}
-	closedList = append(closedList, c)
 
 	return false
 }
@@ -120,13 +121,25 @@ func getValidNodes(c Coordinate, matrix [][]byte) []Coordinate {
 
 	var walkable []Coordinate
 
+	left := byte('0')
+	right := byte('0')
+	up := byte('0')
+	down := byte('0')
+
 	row := c.X
 	column := c.Y
-
-	left := matrix[row][column-1]
-	right := matrix[row][column+1]
-	up := matrix[row-1][column]
-	down := matrix[row+1][column]
+	if column > 0 {
+		left = matrix[row][column-1]
+	}
+	if column < len(matrix[row]) {
+		right = matrix[row][column+1]
+	}
+	if row > 0 {
+		up = matrix[row-1][column]
+	}
+	if row < len(matrix) {
+		down = matrix[row+1][column]
+	}
 
 	if left == DOT || left == G {
 		walkable = append(walkable, newCoordinate(row, column-1, &c))

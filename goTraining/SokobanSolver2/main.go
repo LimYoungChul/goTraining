@@ -29,6 +29,7 @@ var J = byte('J')
 var DOT = byte('.')
 
 // var boxes []Box
+var goalArray []Coordinate
 
 //Coordinate storage
 type Coordinate struct {
@@ -83,56 +84,60 @@ var finalPath [][]Coordinate
 
 func main() {
 	start := time.Now()
-	var stringArray [9]string
-	stringArray[0] = "     XXXXX"
-	stringArray[1] = "XXXXXX...X"
-	stringArray[2] = "X..J.....X"
-	stringArray[3] = "X..JXXX.XX"
-	stringArray[4] = "XXGJG.G.GX"
-	stringArray[5] = " X.JX....X"
-	stringArray[6] = " X..XXXXXX"
-	stringArray[7] = " X..X     "
-	stringArray[8] = " XXXX     "
 
-	var stingArray [9]string
-	stingArray[0] = "XXXXXXXXXX"
-	stingArray[1] = "XXXXXXXXXX"
-	stingArray[2] = "XXG.J..GXX"
-	stingArray[3] = "XX......XX"
-	stingArray[4] = "XX..JJ..XX"
-	stingArray[5] = "XX......XX"
-	stingArray[6] = "XXG.J..GXX"
-	stingArray[7] = "XXXXXXXXXX"
-	stingArray[8] = "XXXXXXXXXX"
+	// stringArray := []string{
+	// 	"XXXXXXXXXX",
+	// 	"XXXXXX...X",
+	// 	"X..J.....X",
+	// 	"X..JXXX.XX",
+	// 	"XXGJG.G.GX",
+	// 	"XX.JX....X",
+	// 	"XX..XXXXXX",
+	// 	"XX..XXXXXX",
+	// 	"XXXXXXXXXX"}
+	stingArray := []string{
+		"XXXXXXXXXX",
+		"XXXXXXXXXX",
+		"XXG.J..GXX",
+		"XX......XX",
+		"XX..JJ..XX",
+		"XX......XX",
+		"XXG.J..GXX",
+		"XXXXXXXXXX",
+		"XXXXXXXXXX"}
 
 	originalMatrix := make([][]byte, 0)
 	// matrixCopy := matrix
 	// matrixPointer := &matrix
 
 	for i := range stingArray {
+		fmt.Println(stingArray[i])
 		tmp := []byte(stingArray[i])
 		originalMatrix = append(originalMatrix[:], tmp)
 	}
-	fmt.Println(step(6, 3, 0, 15, originalMatrix))
 
-	for i, v := range finalPath {
-		fmt.Print("Step number: ")
-		fmt.Print(i)
-		fmt.Print("   ")
-		for i2, v2 := range v {
-			fmt.Print("Move number: ")
-			fmt.Print(i2)
-			fmt.Print(" ")
-			fmt.Print("[")
-			fmt.Print(v2.X)
-			fmt.Print(",")
-			fmt.Print(v2.Y)
-			fmt.Print("]")
-			fmt.Print(" - ")
-		}
-		fmt.Println(":End of move")
-		fmt.Println("**********************************************************")
-	}
+	setGoals(originalMatrix)
+	fmt.Println(len(originalMatrix))
+	fmt.Println(len(originalMatrix[0]))
+	startingPoint := newCoordinate(3, 2, nil)
+	endPoint := newCoordinate(3, 5, nil)
+	fmt.Println(aSTAR(startingPoint, endPoint, originalMatrix))
+	fmt.Println(step(6, 3, 0, 15, originalMatrix))
+	//
+	// for _, v := range finalPath {
+	// 	for _, v2 := range v {
+	// 		lard := originalMatrix[v2.X][v2.Y]
+	// 		originalMatrix[v2.X][v2.Y] = byte('M')
+	// 		for i3 := range originalMatrix {
+	// 			s := string(originalMatrix[i3])
+	// 			fmt.Println(s)
+	// 		}
+	// 		originalMatrix[v2.X][v2.Y] = lard
+	// 		time.Sleep(1000)
+	// 		fmt.Println("         ")
+	// 	}
+	//
+	// }
 
 	//fmt.Sprintf("matrix value %s", string(matrix[6][3])))
 	// fmt.Println(fmt.Sprintf("matrix up %s", string(matrix[5][3])))
@@ -142,6 +147,17 @@ func main() {
 
 	elapsed := time.Since(start)
 	fmt.Println("Runtime: ", elapsed)
+}
+
+func setGoals(matrix [][]byte) {
+
+	for i := range matrix {
+		for i2 := range matrix[i] {
+			if matrix[i][i2] == G {
+				goalArray = append(goalArray, newCoordinate(i, i2, nil))
+			}
+		}
+	}
 }
 
 func step(x, y, counter, maxCounter int, matrix [][]byte) bool {
@@ -163,7 +179,6 @@ func step(x, y, counter, maxCounter int, matrix [][]byte) bool {
 			}
 		}
 	}
-
 	if counter >= maxCounter {
 		return false
 	}
@@ -253,54 +268,46 @@ func updateBoxPushes(x, y int, boxes []Box, matrix [][]byte) {
 		up := matrix[boxes[i].X-1][boxes[i].Y]
 		down := matrix[boxes[i].X+1][boxes[i].Y]
 
+		for i2 := range goalArray {
+			if boxes[i].X == goalArray[i2].X && boxes[i].Y == goalArray[i2].Y {
+				boxes[i].inGoal = true
+			} else {
+				boxes[i].inGoal = false
+			}
+		}
 		if (up == X || down == X) && (left == X || right == X) {
 			boxes[i].stuck = true
+			continue
 		}
-		// if (boxes[i].X == 4) && (boxes[i].Y == 2 || boxes[i].Y == 4 || boxes[i].Y == 6 || boxes[i].Y == 8) {
-		// 	boxes[i].inGoal = true
-		// } else {
-		// 	boxes[i].inGoal = false
-		// }
-		if (boxes[i].X == 2 && boxes[i].Y == 2) || (boxes[i].X == 2 && boxes[i].Y == 7) || (boxes[i].X == 6 && boxes[i].Y == 2) || (boxes[i].X == 6 && boxes[i].Y == 7) {
-			boxes[i].inGoal = true
-		} else {
-			boxes[i].inGoal = false
+		if left == DOT || left == G { // If i can stand to the left of the box.
+			if right == DOT || right == G { // And i can push it to the right of the box.
+				test, _ := aSTAR(origin, newCoordinate(boxes[i].X, boxes[i].Y-1, nil), matrix) // and i can move to the left of the box from where i stand.
+				if test {
+					boxes[i].possiblePushes = append(boxes[i].possiblePushes, "right") //then add that option to the box
+				}
+			}
 		}
-		if boxes[i].stuck == false {
-			if left == DOT || left == G { // If i can stand to the left of the box.
-				if right == DOT || right == G { // And i can push it to the right of the box.
-					test, path := aSTAR(origin, newCoordinate(boxes[i].X, boxes[i].Y-1, nil), matrix) // and i can move to the left of the box from where i stand.
-					if test {
-						boxes[i].possiblePushes = append(boxes[i].possiblePushes, "right") //then add that option to the box
-						boxes[i].rightPath = path
-					}
+		if right == DOT || right == G {
+			if left == DOT || left == G {
+				test, _ := aSTAR(origin, newCoordinate(boxes[i].X, boxes[i].Y+1, nil), matrix)
+				if test {
+					boxes[i].possiblePushes = append(boxes[i].possiblePushes, "left")
 				}
 			}
-			if right == DOT || right == G {
-				if left == DOT || left == G {
-					test, path := aSTAR(origin, newCoordinate(boxes[i].X, boxes[i].Y+1, nil), matrix)
-					if test {
-						boxes[i].possiblePushes = append(boxes[i].possiblePushes, "left")
-						boxes[i].leftPath = path
-					}
-				}
-			}
-			if up == DOT || up == G {
-				if down == DOT || down == G {
-					test, path := aSTAR(origin, newCoordinate(boxes[i].X-1, boxes[i].Y, nil), matrix)
-					if test {
-						boxes[i].possiblePushes = append(boxes[i].possiblePushes, "down")
-						boxes[i].downPath = path
-					}
-				}
-			}
+		}
+		if up == DOT || up == G {
 			if down == DOT || down == G {
-				if up == DOT || up == G {
-					test, path := aSTAR(origin, newCoordinate(boxes[i].X+1, boxes[i].Y, nil), matrix)
-					if test {
-						boxes[i].possiblePushes = append(boxes[i].possiblePushes, "up")
-						boxes[i].upPath = path
-					}
+				test, _ := aSTAR(origin, newCoordinate(boxes[i].X-1, boxes[i].Y, nil), matrix)
+				if test {
+					boxes[i].possiblePushes = append(boxes[i].possiblePushes, "down")
+				}
+			}
+		}
+		if down == DOT || down == G {
+			if up == DOT || up == G {
+				test, _ := aSTAR(origin, newCoordinate(boxes[i].X+1, boxes[i].Y, nil), matrix)
+				if test {
+					boxes[i].possiblePushes = append(boxes[i].possiblePushes, "up")
 				}
 			}
 		}
